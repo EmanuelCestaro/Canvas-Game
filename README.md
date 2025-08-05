@@ -1,2 +1,3 @@
 # Canvas-Game
-A minimalistic reflex game built with HTML5, JavaScript, and CSS.
+A minimalistic reflexes training game built with HTML5, JavaScript, and CSS.
+Not fully tested
