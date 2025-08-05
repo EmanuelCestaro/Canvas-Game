@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="keywords" content="HTML, CSS, JavaScript, Canvas, Game, Code Game">
+  <meta name="author" content="Emanuel Cestaro Mateus">
+  <title>Canvas Game</title>
+  <style>
+    @font-face {
+      font-family: 'square';
+      src: url(square-deal.ttf);
+      font-weight: normal;
+      font-style: normal;
+    }
+    body, html {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+    .main {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      background-color: #f0f0f0;
+    }
+    .center {
+      margin: 0 0 5px 0;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+    #gameOver {
+      position: absolute;
+      top: 300px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      margin-top: 30px;
+      align-items: center;
+      justify-content: center;
+      background-color: black;
+      color: red;
+      flex-direction: column;
+      padding: 20px;
+      border-radius: 10px;
+      min-width: 250px;
+      min-height: 120px;
+      text-align: center;
+      font-size: 30px;
+    }
+    .stats-box {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: black;
+      color: white;
+      font-family: 'square', monospace;
+      padding: 24px 32px;
+      border-radius: 12px;
+      min-width: 260px;
+      text-align: center;
+      z-index: 20;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .burst-over {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: black;
+      color: white;
+      font-family: 'square', monospace;
+      padding: 24px 32px;
+      border-radius: 12px;
+      min-width: 260px;
+      text-align: center;
+      z-index: 20;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .menu-button {
+      position: absolute;
+      top: 400px;
+      height: 60px;
+      width: 130px;
+      font-family: square;
+      font-size: 30px;
+      background-color: black;
+      color: white;
+      border: none;
+      z-index: 100;
+    }
+    #btnStats {
+      right: 200px;
+    }
+    #btnClose {
+      left: 200px;
+    }
+  </style>
+</head>
+<body>
+  <button id="btnStats" style="display: none;" class="menu-button" onclick="showStats()">Stats</button>
+  <button id="btnClose" style="display: none;" class="menu-button" onclick="resetGame()">Close</button>
+  <div class="main">
+    <h1 style="font-size: 90px; font-family: square; margin-top: 40px;">Canvas Game</h1>
+    <h2 id="h2" style="font-size: 42px; font-family: square; flex-direction: column; margin-top: 70px;">Select Difficulty</h2>
+
+    <div id="select" class="center" style="margin-top: 40px">
+      <button onclick="easy()" style="height:60px;width: 100px; background-color: rgb(57, 179, 57); font-family: square; font-size: 30px;">Easy</button>
+      <button onclick="normal()" style="height:60px;width: 100px; background-color: yellow; font-family: square; font-size: 30px;">Normal</button>
+      <button onclick="hard()" style="height:60px;width: 100px; background-color: red; font-family: square; font-size: 30px;">Hard</button>
+    </div>
+
+    <button onclick="burst()" id="burst" style="height:60px;width: 100px; background-color: rgb(0, 0, 0); font-family: square; font-size: 30px; color: white; align-items: center; display: none;">Burst</button>
+
+    <h2 id="time" style="font-family: square; font-size: 30px; display: none; margin-top: 0;">Time:</h2>
+    <div class="center" id="divCanvas" style="display:none; margin-top: 70px;">
+      <canvas id="canvas" style="border:1px solid black;"></canvas>
+    </div>
+
+    <h2 id="streak" style="font-family: square; font-size: 35px;"></h2>
+
+    <div id="gameOver">
+      <h2 style="font-family: square; font-size: 50px;">Game Over</h2>
+      <p id="unlock" style="display:none; font-family: square; color: white;">BURST UNLOCKED</p>
+      <button onclick="resetGame()" style="text-align: center; width: 100px; background-color: rgb(57, 179, 57); font-family: square; font-size: 30px;">Play Again</button>
+    </div>
+
+    <div id="menu" style="display: none; position: absolute; top: 300px; left: 25%; transform: translateX(-50%);">
+      <button onclick="hideMenu()" style="height:60px;width: 100px; background-color: rgb(57, 179, 57); font-family: square; font-size: 30px;">Close</button>
+    </div>
+
+    <div id="pause" style="display: none; position: absolute; left: 50%;top: 40% ; transform: translateX(-50%);text-align: center;">
+      <h2 style="font-family: square; font-size: 50px; color: rgb(0, 0, 0);">Paused</h2>
+      <button onclick="resumeGame()" style="height:60px;width: 100px; background-color: rgb(57, 179, 57); font-family: square; font-size: 30px;">Resume</button>
+    </div>
+
+    <div id="stats" class="stats-box" style="display: none; margin-top: 100px;">
+      <h3 style="font-family: square; font-size: 40px; color: red;">Stats</h3>
+      <p id="hits" style="font-family: square; font-size: 25px;">Hits: </p>
+      <p id="tbh" style="font-family: square; font-size: 25px;">time between hits: </p>
+      <button onclick="closeStatsAndResume()" style="text-align: center; width: 100px; background-color: rgb(57, 179, 57); font-family: square; font-size: 30px;">Resume</button>  
+    </div>
+    <div id="burstOver" class="burst-over" style="display: none; margin-top: 100px;">
+      <h3 style="font-family: square; font-size: 40px; color: red;">Time's Up</h3>
+      <p id="hitsBurst" style="font-family: square; font-size: 25px;">Hits: </p>
+      <p id="tbhBurst" style="font-family: square; font-size: 25px;">time between hits: </p>
+      <button onclick="resetGame()" style="text-align: center; width: 100px; background-color: rgb(57, 179, 57); font-family: square; font-size: 30px;">Menu</button>  
+    </div>
+  </div> 
+
+  <script src="scriptCanva.js"></script>
+</body>
+</html>
